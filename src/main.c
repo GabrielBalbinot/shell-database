@@ -17,9 +17,10 @@ void print_usage(char *argv[]) {
 
 int main(int argc, char *argv[]) { 
 
-    int c = 0;
+    int c = 0, status = 0;
     bool newfile = false;
     char *filepath = NULL;
+    FILE *db = NULL;
 
     while ((c = getopt(argc, argv, "nf:")) != -1) {
 
@@ -51,7 +52,27 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    if (newfile) {
+
+        status = create_db_file(filepath, db);
+
+        if (status == STATUS_ERROR) {
+            printf("Unable to create database file\n");
+            return -1;
+        }
+
+    } else {
+
+        status = open_db_file(filepath, db);
+
+        if (status == STATUS_ERROR) {
+            printf("Unable to open database file\n");
+            return -1;
+        }
+
+    }
+	
     printf("Newfile: %d\n", newfile);
 	printf("Filepath: %s\n", filepath);
-	
+    
 }

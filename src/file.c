@@ -9,11 +9,41 @@
 #include "common.h"
 
 
-int create_db_file(char *filename) {
+int create_db_file(char *filename, FILE *file) {
+
+    file = fopen(filename, "r");
+
+    if (file != NULL) {
+
+        fclose(file);
+        printf("File already exists\n");
+        return STATUS_ERROR;
+
+    }
+
+    file = fopen(filename, "w");
+
+    if (file == NULL) {
+        perror("fopen");
+        return STATUS_ERROR;
+    }
+
+    return STATUS_SUCCESS;
 
 }
 
-int open_db_file(char *filename) {
+int open_db_file(char *filename, FILE *file) {
+
+    file = fopen(filename, "rw");
+
+    if (file == NULL) {
+
+        perror("fopen");
+        return STATUS_ERROR;
+
+    }
+
+    return STATUS_SUCCESS;
 
 }
 
