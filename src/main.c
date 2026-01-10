@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     bool newfile = false;
     char *filepath = NULL;
     FILE *db = NULL;
+    struct dbheader_t *header = NULL;
 
     while ((c = getopt(argc, argv, "nf:")) != -1) {
 
@@ -45,6 +46,7 @@ int main(int argc, char *argv[]) {
 
 
     }
+    
 
     if (filepath == NULL) {
         printf("Filepath is a required argument\n");
@@ -54,25 +56,35 @@ int main(int argc, char *argv[]) {
 
     if (newfile) {
 
-        status = create_db_file(filepath, db);
-
+        status = create_db_file(filepath, &db);
+        
         if (status == STATUS_ERROR) {
             printf("Unable to create database file\n");
+            return -1;
+        }
+        
+        if (create_db_header(db, &header) == STATUS_ERROR) {
+            printf("Failed to create database header\n");
             return -1;
         }
 
     } else {
 
-        status = open_db_file(filepath, db);
+        status = open_db_file(filepath, &db);
 
         if (status == STATUS_ERROR) {
             printf("Unable to open database file\n");
             return -1;
         }
+        
+        if (validate_db_header(db, &header) == STATUS_ERROR) {
+            printf("Failed to validate header\n");
+            return -1;
+        }
 
     }
-	
-    printf("Newfile: %d\n", newfile);
-	printf("Filepath: %s\n", filepath);
+    
+    output_file(db, header);
+    
     
 }

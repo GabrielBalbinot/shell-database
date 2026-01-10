@@ -22,15 +22,93 @@ int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employe
 
 }
 
-int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
-
+int output_file(FILE *fd, struct dbheader_t *header) {
+    
+    if (fd == NULL) {
+        printf("Bad FD from user\n");
+        return STATUS_ERROR;
+    }
+    
+    header->version = htons(header->version);
+    header->count = htons(header->count);
+    header->magic = htonl(header->magic);
+    header->filesize = htonl(header->filesize);
+    
+    fseek(fd, 0, SEEK_SET);
+    fwrite(header, sizeof(struct dbheader_t), 1, fd);
+    return STATUS_SUCCESS;
+    
 }	
 
-int validate_db_header(int fd, struct dbheader_t **headerOut) {
-
+int validate_db_header(FILE *fd, struct dbheader_t **headerOut) {
+    
+    if (fd == NULL) {
+        printf("Bad FD from user\n");
+        return STATUS_ERROR;
+    }
+    
+    struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
+    
+    if (header == NULL) {
+        printf("Malloc failed to create header\n");
+        return STATUS_ERROR;
+    }
+    
+    int size = 0;
+    
+    if (fread(header, 1, sizeof(struct dbheader_t), fd) != sizeof(struct dbheader_t)) {
+        perror("fread");
+        free(header);
+        return STATUS_ERROR;
+    }
+    
+    header->version = ntohs(header->version);
+    header->count = ntohs(header->count);
+    header->magic = ntohl(header->magic);
+    header->filesize = ntohl(header->filesize);
+    
+    if (header->magic != HEADER_MAGIC) {
+        printf("Improper head magic\n");
+        free(header);
+        return STATUS_ERROR;
+    }
+    
+    if (header->version != 1) {
+        printf("Improper header version\n");
+        free(header);
+        return STATUS_ERROR;
+    }
+    
+    struct stat dbstat = {0};
+    fstat(fileno(fd), &dbstat);
+    if (header->filesize != dbstat.st_size) {
+        printf("Corrupted database\n");
+        free(header);
+        return STATUS_ERROR;
+    }
+    
+    *headerOut = header;
+    
+    
 }
 
-int create_db_header(int fd, struct dbheader_t **headerOut) {
+int create_db_header(FILE  *fd, struct dbheader_t **headerOut) {
+	
+	struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
+	
+	if (header == NULL) {
+	    printf("Malloc failed to create header\n");
+	    return STATUS_ERROR;
+	}
+	
+	header->version = 0x1;
+	header->count = 0;
+	header->magic = HEADER_MAGIC;
+	header->filesize = sizeof(struct dbheader_t);
+	
+	*headerOut = header;
+	
+	return STATUS_SUCCESS;
 	
 }
 

@@ -9,9 +9,9 @@
 #include "common.h"
 
 
-int create_db_file(char *filename, FILE *file) {
+int create_db_file(char *filename, FILE **fileOut) {
 
-    file = fopen(filename, "r");
+    FILE *file = fopen(filename, "r");
 
     if (file != NULL) {
 
@@ -20,21 +20,23 @@ int create_db_file(char *filename, FILE *file) {
         return STATUS_ERROR;
 
     }
-
+    
     file = fopen(filename, "w");
 
     if (file == NULL) {
         perror("fopen");
         return STATUS_ERROR;
     }
+    
+    *fileOut = file;
 
     return STATUS_SUCCESS;
 
 }
 
-int open_db_file(char *filename, FILE *file) {
+int open_db_file(char *filename, FILE **fileOut) {
 
-    file = fopen(filename, "rw");
+    FILE *file = fopen(filename, "rw");
 
     if (file == NULL) {
 
@@ -43,6 +45,7 @@ int open_db_file(char *filename, FILE *file) {
 
     }
 
+    *fileOut = file;
     return STATUS_SUCCESS;
 
 }
