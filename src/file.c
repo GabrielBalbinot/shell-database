@@ -36,7 +36,7 @@ int create_db_file(char *filename, FILE **fileOut) {
 
 int open_db_file(char *filename, FILE **fileOut) {
 
-    FILE *file = fopen(filename, "rw");
+    FILE *file = fopen(filename, "rb+");
 
     if (file == NULL) {
 

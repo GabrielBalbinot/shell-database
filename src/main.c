@@ -19,11 +19,12 @@ int main(int argc, char *argv[]) {
 
     int c = 0, status = 0;
     bool newfile = false;
-    char *filepath = NULL;
+    char *filepath = NULL, *addstring = NULL;
     FILE *db = NULL;
     struct dbheader_t *header = NULL;
+    struct employee_t *employees = NULL;
 
-    while ((c = getopt(argc, argv, "nf:")) != -1) {
+    while ((c = getopt(argc, argv, "nf:a:")) != -1) {
 
         switch (c) {
             case 'n':
@@ -32,6 +33,10 @@ int main(int argc, char *argv[]) {
 
             case 'f':
                 filepath = optarg;
+                break;
+                
+            case 'a':
+                addstring = optarg;
                 break;
 
             case '?':
@@ -84,7 +89,22 @@ int main(int argc, char *argv[]) {
 
     }
     
-    output_file(db, header);
+    if (read_employees(db, header, &employees) == STATUS_ERROR) {
+        
+        printf("Failed to read employees\n");
+        return 0;
+        
+    }
     
+    
+    if (addstring) {
+        
+        header->count++;
+        employees = realloc(employees, header->count*(sizeof(struct employee_t)));
+        add_employee(header, employees, addstring);
+        
+    }
+    
+    output_file(db, header, employees);
     
 }

@@ -14,28 +14,76 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 
 }
 
-int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *addstring) {
-
+int add_employee(struct dbheader_t *header, struct employee_t *employees, char *addstring) {
+    
+    char *name = strtok(addstring, ",");
+    char *addr = strtok(NULL, ",");
+    char *hours = strtok(NULL, ",");
+    
+    strncpy(employees[header->count-1].name, name, sizeof(employees[header->count-1].name));
+    strncpy(employees[header->count-1].address, addr, sizeof(employees[header->count-1].address));
+    
+    employees[header->count-1].hours = atoi(hours);
+    
+    return STATUS_SUCCESS;
+    
 }
 
-int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut) {
-
+int read_employees(FILE *fd, struct dbheader_t *header, struct employee_t **employeesOut) {
+    if (fd == NULL) {
+        printf("Bad FD from user\n");
+        return STATUS_ERROR;
+    }
+    
+    int count = header->count;
+    
+    struct employee_t *employees = calloc(count, sizeof(struct employee_t));
+    
+    if (employees == NULL) {
+        
+        printf("Malloc failed\n");
+        return STATUS_ERROR;
+        
+    }
+    
+    fread(employees, sizeof(struct employee_t), count, fd);
+    
+    for (int i=0; i < count; i++) {
+        
+        employees[i].hours = ntohl(employees[i].hours);
+        
+    }
+    
+    *employeesOut = employees;
+    
+    return STATUS_SUCCESS;
 }
 
-int output_file(FILE *fd, struct dbheader_t *header) {
+int output_file(FILE *fd, struct dbheader_t *header, struct employee_t *employees) {
     
     if (fd == NULL) {
         printf("Bad FD from user\n");
         return STATUS_ERROR;
     }
     
+    int count = header->count;
+    
     header->version = htons(header->version);
     header->count = htons(header->count);
     header->magic = htonl(header->magic);
-    header->filesize = htonl(header->filesize);
+    header->filesize = htonl(sizeof(struct dbheader_t) + sizeof(struct employee_t) * count);
     
     fseek(fd, 0, SEEK_SET);
     fwrite(header, sizeof(struct dbheader_t), 1, fd);
+    fseek(fd, sizeof(struct dbheader_t), SEEK_SET);
+
+    for (int i=0; i < count; i++) {
+        
+        employees[i].hours = htonl(employees[i].hours);
+        fwrite(&employees[i], sizeof(struct employee_t), 1, fd);
+        
+    }
+    
     return STATUS_SUCCESS;
     
 }	
