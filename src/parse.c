@@ -10,8 +10,17 @@
 #include "common.h"
 #include "parse.h"
 
-void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
-
+void list_employees(struct dbheader_t *header, struct employee_t *employees) {
+    
+    for (int i=0; i < header->count; i++) {
+        
+        printf("Employee %d\n", i);
+        printf("\tName: %s\n", employees[i].name);
+        printf("\tAddress: %s\n", employees[i].address);
+        printf("\tHours: %d\n\n", employees[i].hours);
+        
+    }
+    
 }
 
 int add_employee(struct dbheader_t *header, struct employee_t **employees, char *addstring) {
@@ -29,7 +38,7 @@ int add_employee(struct dbheader_t *header, struct employee_t **employees, char 
     if (hours == NULL) return STATUS_ERROR;
     
     struct employee_t *e = *employees;
-    e = realloc(e, sizeof(struct employee_t) * header->count+1);
+    e = realloc(e, sizeof(struct employee_t) * (header->count+1));
     if (e == NULL) {
         printf("Malloc failed\n");
         return STATUS_ERROR;

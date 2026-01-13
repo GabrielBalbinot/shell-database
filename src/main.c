@@ -12,20 +12,21 @@ void print_usage(char *argv[]) {
     printf("Usage: %s -n -f <database file>\n", argv[0]);
     printf("\t -n - create a new database file\n");
     printf("\t -f - (required) path to database file\n");
-    printf("\t -a - add via CSV list of (name,addres,hours");
+    printf("\t -a - add via CSV list of (name,addres,hours\n");
+    printf("\t -l - list all employees\n");
 
 }
 
 int main(int argc, char *argv[]) { 
 
     int c = 0, status = 0;
-    bool newfile = false;
+    bool newfile = false, list = false;
     char *filepath = NULL, *addstring = NULL;
     FILE *db = NULL;
     struct dbheader_t *header = NULL;
     struct employee_t *employees = NULL;
 
-    while ((c = getopt(argc, argv, "nf:a:")) != -1) {
+    while ((c = getopt(argc, argv, "nf:a:l")) != -1) {
 
         switch (c) {
             case 'n':
@@ -39,7 +40,11 @@ int main(int argc, char *argv[]) {
             case 'a':
                 addstring = optarg;
                 break;
-
+            
+            case 'l':
+                list = true;
+                break;
+            
             case '?':
                 printf("Unknown option - %c\n", c);
                 break;
@@ -100,6 +105,10 @@ int main(int argc, char *argv[]) {
     
     if (addstring) {
         add_employee(header, &employees, addstring);
+    }
+    
+    if (list) {
+        list_employees(header, employees);
     }
     
     output_file(db, header, employees);
