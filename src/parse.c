@@ -14,16 +14,35 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 
 }
 
-int add_employee(struct dbheader_t *header, struct employee_t *employees, char *addstring) {
+int add_employee(struct dbheader_t *header, struct employee_t **employees, char *addstring) {
+    
+    if (header == NULL || employees == NULL || *employees == NULL || addstring == NULL) 
+        return STATUS_ERROR;
     
     char *name = strtok(addstring, ",");
+    if (name == NULL) return STATUS_ERROR;
+    
     char *addr = strtok(NULL, ",");
+    if (addr == NULL) return STATUS_ERROR;
+    
     char *hours = strtok(NULL, ",");
+    if (hours == NULL) return STATUS_ERROR;
     
-    strncpy(employees[header->count-1].name, name, sizeof(employees[header->count-1].name));
-    strncpy(employees[header->count-1].address, addr, sizeof(employees[header->count-1].address));
+    struct employee_t *e = *employees;
+    e = realloc(e, sizeof(struct employee_t) * header->count+1);
+    if (e == NULL) {
+        printf("Malloc failed\n");
+        return STATUS_ERROR;
+    }
     
-    employees[header->count-1].hours = atoi(hours);
+    header->count++;
+    
+    strncpy(e[header->count-1].name, name, sizeof(e[header->count-1].name));
+    strncpy(e[header->count-1].address, addr, sizeof(e[header->count-1].address));
+    
+    e[header->count-1].hours = atoi(hours);
+    
+    *employees = e;
     
     return STATUS_SUCCESS;
     
