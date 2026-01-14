@@ -9,10 +9,10 @@
 
 void print_usage(char *argv[]) {
 
-    printf("Usage: %s -n -f <database file>\n", argv[0]);
+    printf("Usage: %s -n -f <database file> -a <CSV List> -l\n", argv[0]);
     printf("\t -n - create a new database file\n");
     printf("\t -f - (required) path to database file\n");
-    printf("\t -a - add via CSV list of (name,addres,hours\n");
+    printf("\t -a - add via CSV list of (name,addres,hours)\n");
     printf("\t -l - list all employees\n");
 
 }
